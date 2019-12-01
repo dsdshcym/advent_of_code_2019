@@ -5,6 +5,10 @@ defmodule Rocket do
     mass
     |> Kernel.div(3)
     |> Kernel.-(2)
+    |> case do
+         positive when positive > 0 -> positive
+         _ -> 0
+       end
   end
 end
 
@@ -16,6 +20,7 @@ defmodule RocketTest do
     assert Rocket.required_fuel(14) == 2
     assert Rocket.required_fuel(1969) == 654
     assert Rocket.required_fuel(100_756) == 33583
+    assert Rocket.required_fuel(2) == 0
   end
 end
 
