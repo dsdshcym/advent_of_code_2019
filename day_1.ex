@@ -10,6 +10,19 @@ defmodule Rocket do
          _ -> 0
        end
   end
+
+  def fuel_in_total(mass) do
+    mass
+    |> required_fuel()
+    |> total()
+  end
+
+  defp total(mass) do
+    case required_fuel(mass) do
+      0 -> mass
+      fuel -> mass + total(fuel)
+    end
+  end
 end
 
 defmodule RocketTest do
@@ -21,6 +34,12 @@ defmodule RocketTest do
     assert Rocket.required_fuel(1969) == 654
     assert Rocket.required_fuel(100_756) == 33583
     assert Rocket.required_fuel(2) == 0
+  end
+
+  test "fuel_in_total/1" do
+    assert Rocket.fuel_in_total(14) == 2
+    assert Rocket.fuel_in_total(1969) == 966
+    assert Rocket.fuel_in_total(100756) == 50346
   end
 end
 
@@ -126,6 +145,6 @@ end
   51208,
   66372
 ]
-|> Enum.map(&Rocket.required_fuel/1)
+|> Enum.map(&Rocket.fuel_in_total/1)
 |> Enum.sum()
 |> IO.inspect()
