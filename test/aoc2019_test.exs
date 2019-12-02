@@ -476,3 +476,16 @@ input
 |> AoC2019.run(12, 2)
 |> AoC2019.output()
 |> IO.inspect(label: "Part 1")
+
+for noun <- 0..99, verb <- 0..99 do
+  input
+  |> AoC2019.run(noun, verb)
+  |> AoC2019.output()
+  |> case do
+    19_690_720 ->
+      IO.inspect(100 * noun + verb, label: "Part 2")
+
+    _ ->
+      nil
+  end
+end
