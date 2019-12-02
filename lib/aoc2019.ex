@@ -3,6 +3,13 @@ defmodule AoC2019 do
   Documentation for AoC2019.
   """
 
+  def run(stack, noun, verb) do
+    stack
+    |> List.replace_at(1, noun)
+    |> List.replace_at(2, verb)
+    |> run()
+  end
+
   def run(stack) do
     run(stack, 0)
   end
