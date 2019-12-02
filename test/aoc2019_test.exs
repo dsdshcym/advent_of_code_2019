@@ -474,5 +474,5 @@ input = [
 
 input
 |> AoC2019.run(12, 2)
-|> Enum.at(0)
+|> AoC2019.output()
 |> IO.inspect(label: "Part 1")

@@ -3,6 +3,10 @@ defmodule AoC2019 do
   Documentation for AoC2019.
   """
 
+  def output(memory) do
+    List.first(memory)
+  end
+
   def run(stack, noun, verb) do
     stack
     |> List.replace_at(1, noun)
