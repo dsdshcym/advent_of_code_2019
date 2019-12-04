@@ -43,25 +43,25 @@ defmodule AoC2019 do
   defp parse_direction("D"), do: :down
 
   def to_wire(instructions) do
-    to_wire({0, 0}, instructions, [])
+    [{0, 0}]
+    |> to_wire(instructions)
+    |> List.delete({0, 0})
   end
 
-  defp to_wire(_point, [], wire), do: wire
+  defp to_wire(wire, []), do: Enum.reverse(wire)
 
-  defp to_wire(point, [instruction | rest], wire) do
-    {next_point, line} = to_line(point, instruction)
-
-    to_wire(next_point, rest, wire ++ line)
+  defp to_wire(wire, [instruction | rest]) do
+    wire
+    |> extend(instruction)
+    |> to_wire(rest)
   end
 
-  defp to_line(point, {direction, step}) do
-    line =
-      point
-      |> Stream.iterate(&move(&1, direction))
-      |> Stream.drop(1)
-      |> Enum.take(step)
+  defp extend(wire, {_direction, 0}) do
+    wire
+  end
 
-    {List.last(line), line}
+  defp extend([current_point | _] = wire, {direction, step}) do
+    extend([move(current_point, direction) | wire], {direction, step - 1})
   end
 
   defp move({x, y}, :right), do: {x + 1, y}
