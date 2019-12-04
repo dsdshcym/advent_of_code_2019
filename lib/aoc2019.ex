@@ -15,6 +15,18 @@ defmodule AoC2019 do
     |> Enum.min()
   end
 
+  def part_2(input) do
+    [wire_1, wire_2] =
+      input
+      |> String.split("\n")
+      |> Enum.map(&parse/1)
+      |> Enum.map(&to_wire/1)
+
+    intersection(wire_1, wire_2)
+    |> Enum.map(&(signal_delay(wire_1, &1) + signal_delay(wire_2, &1)))
+    |> Enum.min()
+  end
+
   def parse(line) do
     line
     |> String.split(",")
@@ -65,5 +77,9 @@ defmodule AoC2019 do
 
   defp manhattan_distance({x1, y1}, {x2, y2}) do
     abs(x1 - x2) + abs(y1 - y2)
+  end
+
+  def signal_delay(wire, point) do
+    Enum.find_index(wire, &(&1 == point)) + 1
   end
 end

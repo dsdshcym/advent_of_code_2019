@@ -23,6 +23,13 @@ U98,R91,D20,R16,D67,R40,U7,R15,U6,R7") == 135
     assert AoC2019.to_wire([{:right, 8}]) ==
              [{1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {8, 0}]
   end
+
+  test "part_2/1" do
+    assert AoC2019.part_2("R75,D30,R83,U83,L12,D49,R71,U7,L72
+U62,R66,U55,R34,D71,R55,D58,R83") == 610
+    assert AoC2019.part_2("R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51
+U98,R91,D20,R16,D67,R40,U7,R15,U6,R7") == 410
+  end
 end
 
 input =
@@ -32,3 +39,7 @@ L998,U952,R204,U266,R353,U227,L209,D718,L28,D989,R535,U517,L934,D711,R878,U268,L
 input
 |> AoC2019.part_1()
 |> IO.inspect(label: "Part 1")
+
+input
+|> AoC2019.part_2()
+|> IO.inspect(label: "Part 2")
