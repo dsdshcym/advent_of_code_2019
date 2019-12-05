@@ -7,7 +7,7 @@ defmodule AoC2019 do
     digits = Integer.digits(number)
 
     six_digits?(digits) &&
-      has_two_adjacent_same_digits?(digits) &&
+      has_at_least_one_exact_two_adjacent_matching_digits?(digits) &&
       never_decrease?(digits)
   end
 
@@ -15,11 +15,23 @@ defmodule AoC2019 do
     length(digits) == 6
   end
 
-  defp has_two_adjacent_same_digits?(digits) do
+  defp has_at_least_one_exact_two_adjacent_matching_digits?(digits) do
     digits
-    |> Enum.chunk_every(2, 1, :discard)
-    |> Enum.any?(fn [a, b] -> a == b end)
+    |> run_length_encoding()
+    |> Enum.any?(fn {_digit, matching_count} -> matching_count == 2 end)
   end
+
+  defp run_length_encoding(digits) do
+    run_length_encoding(digits, [])
+  end
+
+  defp run_length_encoding([], results), do: results
+
+  defp run_length_encoding([digit | rest_digits], [{digit, count} | rest_results]),
+    do: run_length_encoding(rest_digits, [{digit, count + 1} | rest_results])
+
+  defp run_length_encoding([digit | rest_digits], results),
+    do: run_length_encoding(rest_digits, [{digit, 1} | results])
 
   defp never_decrease?(digits) do
     digits

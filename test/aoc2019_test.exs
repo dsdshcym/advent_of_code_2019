@@ -18,6 +18,13 @@ defmodule AoC2019Test do
       assert AoC2019.valid_password?(134_489) == true
       assert AoC2019.valid_password?(871_345) == false
     end
+
+    test "the two adjacent matching digits are not part of a larger group of matching digits." do
+      assert AoC2019.valid_password?(112_233) == true
+      assert AoC2019.valid_password?(123_444) == false
+
+      "111122 meets the criteria (even though 1 is repeated more than twice, it still contains a double 22)."
+    end
   end
 end
 
@@ -25,4 +32,4 @@ input = 134_564..585_159
 
 input
 |> Enum.count(&AoC2019.valid_password?/1)
-|> IO.inspect(label: "Part 1")
+|> IO.inspect(label: "Part 2")
