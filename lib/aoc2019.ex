@@ -3,7 +3,9 @@ defmodule AoC2019 do
   Documentation for AoC2019.
   """
 
-  def parse(input) do
+  def parse(input, inputs \\ [1])
+
+  def parse(input, inputs) do
     memory =
       input
       |> String.split(",")
@@ -12,7 +14,7 @@ defmodule AoC2019 do
       |> Enum.map(fn {value, address} -> {address, value} end)
       |> Map.new()
 
-    {0, memory, [1], []}
+    {0, memory, inputs, []}
   end
 
   def run(simulator) do
