@@ -46,6 +46,42 @@ defmodule AoC2019 do
 
         {:ok, {ip + 2, memory, inputs, outputs ++ [output]}}
 
+      {:"jump-if-true", parameter_mode_1, parameter_mode_2} ->
+        condition = get(memory, ip + 1, parameter_mode_1)
+
+        new_ip =
+          if condition != 0,
+            do: get(memory, ip + 2, parameter_mode_2),
+            else: ip + 3
+
+        {:ok, {new_ip, memory, inputs, outputs}}
+
+      {:"jump-if-false", parameter_mode_1, parameter_mode_2} ->
+        condition = get(memory, ip + 1, parameter_mode_1)
+
+        new_ip =
+          if condition == 0,
+            do: get(memory, ip + 2, parameter_mode_2),
+            else: ip + 3
+
+        {:ok, {new_ip, memory, inputs, outputs}}
+
+      {:"less than", parameter_mode_1, parameter_mode_2} ->
+        a = get(memory, ip + 1, parameter_mode_1)
+        b = get(memory, ip + 2, parameter_mode_2)
+
+        result = if a < b, do: 1, else: 0
+
+        {:ok, {ip + 4, Map.put(memory, memory[ip + 3], result), inputs, outputs}}
+
+      {:equals, parameter_mode_1, parameter_mode_2} ->
+        a = get(memory, ip + 1, parameter_mode_1)
+        b = get(memory, ip + 2, parameter_mode_2)
+
+        result = if a == b, do: 1, else: 0
+
+        {:ok, {ip + 4, Map.put(memory, memory[ip + 3], result), inputs, outputs}}
+
       :halt ->
         {:halt, {ip + 1, memory, inputs, outputs}}
     end
@@ -64,6 +100,18 @@ defmodule AoC2019 do
 
       [_, _, parameter_mode, 0, 4] ->
         {:output, parameter_mode}
+
+      [_, parameter_mode_2, parameter_mode_1, 0, 5] ->
+        {:"jump-if-true", parameter_mode_1, parameter_mode_2}
+
+      [_, parameter_mode_2, parameter_mode_1, 0, 6] ->
+        {:"jump-if-false", parameter_mode_1, parameter_mode_2}
+
+      [_, parameter_mode_2, parameter_mode_1, 0, 7] ->
+        {:"less than", parameter_mode_1, parameter_mode_2}
+
+      [_, parameter_mode_2, parameter_mode_1, 0, 8] ->
+        {:equals, parameter_mode_1, parameter_mode_2}
 
       [_, _, _, 9, 9] ->
         :halt

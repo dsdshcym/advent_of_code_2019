@@ -59,6 +59,62 @@ defmodule AoC2019Test do
       assert memory == build(:memory, [4, 0])
       assert new_output == [2, 4]
     end
+
+    test "jump-if-true" do
+      {:ok, {ip, memory, _, _}} =
+        AoC2019.step(build(:simulator, 0, build(:memory, [5, 2, 0]), [1], [2]))
+
+      assert ip == 3
+      assert memory == build(:memory, [5, 2, 0])
+
+      {:ok, {ip, memory, _, _}} =
+        AoC2019.step(build(:simulator, 0, build(:memory, [105, 2, 0]), [1], [2]))
+
+      assert ip == 105
+      assert memory == build(:memory, [105, 2, 0])
+    end
+
+    test "jump-if-false" do
+      {:ok, {ip, memory, _, _}} =
+        AoC2019.step(build(:simulator, 0, build(:memory, [6, 2, 0]), [1], [2]))
+
+      assert ip == 6
+      assert memory == build(:memory, [6, 2, 0])
+
+      {:ok, {ip, memory, _, _}} =
+        AoC2019.step(build(:simulator, 0, build(:memory, [1106, 2, 0]), [1], [2]))
+
+      assert ip == 3
+      assert memory == build(:memory, [1106, 2, 0])
+    end
+
+    test "less than" do
+      {:ok, {ip, memory, _, _}} =
+        AoC2019.step(build(:simulator, 0, build(:memory, [1107, 2, 0, 1]), [1], [2]))
+
+      assert ip == 4
+      assert memory == build(:memory, [1107, 0, 0, 1])
+
+      {:ok, {ip, memory, _, _}} =
+        AoC2019.step(build(:simulator, 0, build(:memory, [1107, -2, 0, 2]), [1], [2]))
+
+      assert ip == 4
+      assert memory == build(:memory, [1107, -2, 1, 2])
+    end
+
+    test "equals" do
+      {:ok, {ip, memory, _, _}} =
+        AoC2019.step(build(:simulator, 0, build(:memory, [1108, 0, 0, 2]), [1], [2]))
+
+      assert ip == 4
+      assert memory == build(:memory, [1108, 0, 1, 2])
+
+      {:ok, {ip, memory, _, _}} =
+        AoC2019.step(build(:simulator, 0, build(:memory, [1108, 3, 0, 1]), [1], [2]))
+
+      assert ip == 4
+      assert memory == build(:memory, [1108, 0, 0, 1])
+    end
   end
 
   describe "run/1" do
