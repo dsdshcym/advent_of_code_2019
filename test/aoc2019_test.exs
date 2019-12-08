@@ -1092,4 +1092,26 @@ K)L"
       assert AoC2019.part_1(@input) == 162_439
     end
   end
+
+  describe "part_2/1" do
+    test "example" do
+      assert AoC2019.part_2("COM)B
+B)C
+C)D
+D)E
+E)F
+B)G
+G)H
+D)I
+E)J
+J)K
+K)L
+K)YOU
+I)SAN") == 4
+    end
+
+    test "test input" do
+      assert AoC2019.part_2(@input) == 367
+    end
+  end
 end
