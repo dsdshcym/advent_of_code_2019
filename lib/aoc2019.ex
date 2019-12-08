@@ -8,7 +8,8 @@ defmodule AoC2019 do
 
     map
     |> Map.keys()
-    |> Enum.map(&total_orbits(map, &1))
+    |> Enum.map(&ancestors(map, &1))
+    |> Enum.map(&Enum.count(&1))
     |> Enum.sum()
   end
 
@@ -16,18 +17,22 @@ defmodule AoC2019 do
     input
     |> String.split("\n")
     |> Enum.reduce(%{}, fn line, map ->
-      [object, direct_orbit] = String.split(line, ")")
-
-      Map.update(map, object, [direct_orbit], fn direct_orbits ->
-        [direct_orbit | direct_orbits]
-      end)
+      [orbited, orbiting] = String.split(line, ")")
+      Map.put_new(map, orbiting, orbited)
     end)
   end
 
-  def total_orbits(map, object) do
-    map
-    |> Map.get(object, [])
-    |> Enum.map(&(total_orbits(map, &1) + 1))
-    |> Enum.sum()
+  def ancestors(_map, "COM") do
+    []
+  end
+
+  def ancestors(map, object) do
+    ancestor = ancestor(map, object)
+    [ancestor | ancestors(map, ancestor)]
+  end
+
+  defp ancestor(map, object) do
+    {:ok, ancestor} = Map.fetch(map, object)
+    ancestor
   end
 end

@@ -1072,36 +1072,6 @@ BPX)2NW
 5LR)PYY
 VXL)6HL"
 
-  describe "parse/1" do
-    test "single line" do
-      assert AoC2019.parse("COM)B") == %{"COM" => ["B"]}
-    end
-
-    test "multiple line" do
-      assert AoC2019.parse("E)F\nE)J\nJ)K") == %{"E" => ["J", "F"], "J" => ["K"]}
-    end
-  end
-
-  describe "total_orbits/2" do
-    test "returns 0 for objects with no direct orbits" do
-      map = %{"L" => []}
-
-      assert AoC2019.total_orbits(map, "L") == 0
-    end
-
-    test "returns num of direct orbits for objects with no indirect orbits" do
-      map = %{"E" => ["J", "F"], "J" => [], "F" => []}
-
-      assert AoC2019.total_orbits(map, "E") == 2
-    end
-
-    test "returns sum of direct orbits and direct orbits' total orbits" do
-      map = %{"E" => ["J", "F"], "J" => ["K"], "F" => ["L"]}
-
-      assert AoC2019.total_orbits(map, "E") == 4
-    end
-  end
-
   describe "part 1" do
     test "example" do
       input = "COM)B
