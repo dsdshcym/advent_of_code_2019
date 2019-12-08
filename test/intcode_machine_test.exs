@@ -118,56 +118,45 @@ defmodule IntcodeMachineTest do
     end
   end
 
-  describe "run/1" do
+  describe "new/1" do
     test "part 1" do
-      {_, _, _, output} = @input |> IntcodeMachine.parse() |> IntcodeMachine.run()
+      output = IntcodeMachine.new(@input).([1])
       assert List.last(output) == 12_428_642
     end
 
     test "part 2" do
-      assert {_, _, _, [1]} =
-               "3,9,8,9,10,9,4,9,99,-1,8" |> IntcodeMachine.parse([8]) |> IntcodeMachine.run()
+      assert [1] = IntcodeMachine.new("3,9,8,9,10,9,4,9,99,-1,8").([8])
 
-      assert {_, _, _, [0]} =
-               "3,9,8,9,10,9,4,9,99,-1,8" |> IntcodeMachine.parse([2]) |> IntcodeMachine.run()
+      assert [0] = IntcodeMachine.new("3,9,8,9,10,9,4,9,99,-1,8").([2])
 
-      assert {_, _, _, [1]} =
-               "3,9,7,9,10,9,4,9,99,-1,8" |> IntcodeMachine.parse([7]) |> IntcodeMachine.run()
+      assert [1] = IntcodeMachine.new("3,9,7,9,10,9,4,9,99,-1,8").([7])
 
-      assert {_, _, _, [0]} =
-               "3,9,7,9,10,9,4,9,99,-1,8" |> IntcodeMachine.parse([8]) |> IntcodeMachine.run()
+      assert [0] = IntcodeMachine.new("3,9,7,9,10,9,4,9,99,-1,8").([8])
 
-      assert {_, _, _, [1]} =
-               "3,3,1108,-1,8,3,4,3,99" |> IntcodeMachine.parse([8]) |> IntcodeMachine.run()
+      assert [1] = IntcodeMachine.new("3,3,1108,-1,8,3,4,3,99").([8])
 
-      assert {_, _, _, [0]} =
-               "3,3,1108,-1,8,3,4,3,99" |> IntcodeMachine.parse([9]) |> IntcodeMachine.run()
+      assert [0] = IntcodeMachine.new("3,3,1108,-1,8,3,4,3,99").([9])
 
-      assert {_, _, _, [1]} =
-               "3,3,1107,-1,8,3,4,3,99" |> IntcodeMachine.parse([6]) |> IntcodeMachine.run()
+      assert [1] = IntcodeMachine.new("3,3,1107,-1,8,3,4,3,99").([6])
 
-      assert {_, _, _, [0]} =
-               "3,3,1107,-1,8,3,4,3,99" |> IntcodeMachine.parse([8]) |> IntcodeMachine.run()
+      assert [0] = IntcodeMachine.new("3,3,1107,-1,8,3,4,3,99").([8])
 
-      assert {_, _, _, [999]} =
-               "3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,1106,0,36,98,0,0,1002,21,125,20,4,20,1105,1,46,104,999,1105,1,46,1101,1000,1,20,4,20,1105,1,46,98,99"
-               |> IntcodeMachine.parse([7])
-               |> IntcodeMachine.run()
+      assert [999] =
+               IntcodeMachine.new(
+                 "3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,1106,0,36,98,0,0,1002,21,125,20,4,20,1105,1,46,104,999,1105,1,46,1101,1000,1,20,4,20,1105,1,46,98,99"
+               ).([7])
 
-      assert {_, _, _, [1000]} =
-               "3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,1106,0,36,98,0,0,1002,21,125,20,4,20,1105,1,46,104,999,1105,1,46,1101,1000,1,20,4,20,1105,1,46,98,99"
-               |> IntcodeMachine.parse([8])
-               |> IntcodeMachine.run()
+      assert [1000] =
+               IntcodeMachine.new(
+                 "3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,1106,0,36,98,0,0,1002,21,125,20,4,20,1105,1,46,104,999,1105,1,46,1101,1000,1,20,4,20,1105,1,46,98,99"
+               ).([8])
 
-      assert {_, _, _, [1001]} =
-               "3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,1106,0,36,98,0,0,1002,21,125,20,4,20,1105,1,46,104,999,1105,1,46,1101,1000,1,20,4,20,1105,1,46,98,99"
-               |> IntcodeMachine.parse([9])
-               |> IntcodeMachine.run()
+      assert [1001] =
+               IntcodeMachine.new(
+                 "3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,1106,0,36,98,0,0,1002,21,125,20,4,20,1105,1,46,104,999,1105,1,46,1101,1000,1,20,4,20,1105,1,46,98,99"
+               ).([9])
 
-      assert {_, _, _, [918_655]} =
-               @input
-               |> IntcodeMachine.parse([5])
-               |> IntcodeMachine.run()
+      assert [918_655] = IntcodeMachine.new(@input).([5])
     end
   end
 

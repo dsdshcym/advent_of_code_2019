@@ -1,4 +1,20 @@
 defmodule IntcodeMachine do
+  def new(input) do
+    memory =
+      input
+      |> String.split(",")
+      |> Enum.map(&String.to_integer/1)
+      |> Enum.with_index()
+      |> Enum.map(fn {value, address} -> {address, value} end)
+      |> Map.new()
+
+    fn inputs ->
+      {_ip, _memory, _inputs, outputs} = run({0, memory, inputs, []})
+
+      outputs
+    end
+  end
+
   def parse(input, inputs \\ [1])
 
   def parse(input, inputs) do
