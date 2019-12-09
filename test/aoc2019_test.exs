@@ -14,4 +14,12 @@ defmodule AoC2019Test do
       assert AoC2019.p1(@input, 25, 6) == 2032
     end
   end
+
+  describe "p2" do
+    test "example" do
+      assert AoC2019.p2("0222112222120000", 2, 2) == "01\n10"
+    end
+  end
+
+  IO.puts(AoC2019.p2(@input, 25, 6) |> String.replace("0", " ") |> String.replace("1", "."))
 end
