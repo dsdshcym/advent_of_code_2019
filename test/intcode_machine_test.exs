@@ -50,10 +50,17 @@ defmodule IntcodeMachineTest do
       assert ip == 2
       assert memory == build(:memory, [3, 30])
       assert rest_inputs == [2]
+
+      assert {:await_on_input, input_callback} =
+               IntcodeMachine.step(build(:simulator, 0, build(:memory, [3, 1]), []))
+
+      assert {ip, memory} = input_callback.(30)
+      assert ip == 2
+      assert memory == build(:memory, [3, 30])
     end
 
     test "output" do
-      {:ok, {ip, memory, _, new_output}} =
+      {:output, {ip, memory, _, new_output}} =
         IntcodeMachine.step(build(:simulator, 0, build(:memory, [4, 0]), [], [2]))
 
       assert ip == 2

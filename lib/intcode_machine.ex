@@ -31,8 +31,8 @@ defmodule IntcodeMachine do
 
   def run(simulator) do
     case step(simulator) do
-      {:ok, new_simulator} -> run(new_simulator)
       {:halt, new_simulator} -> new_simulator
+      {_operation, new_simulator} -> run(new_simulator)
     end
   end
 
@@ -52,13 +52,21 @@ defmodule IntcodeMachine do
 
       :input ->
         cp = memory[ip + 1]
-        [i | rest_inputs] = inputs
-        {:ok, {ip + 2, Map.put(memory, cp, i), rest_inputs, outputs}}
+
+        case inputs do
+          [i | rest_inputs] ->
+            {:ok, {ip + 2, Map.put(memory, cp, i), rest_inputs, outputs}}
+
+          [] ->
+            input_callback = fn i -> {ip + 2, Map.put(memory, cp, i)} end
+
+            {:await_on_input, input_callback}
+        end
 
       {:output, parameter_mode} ->
         output = get(memory, ip + 1, parameter_mode)
 
-        {:ok, {ip + 2, memory, inputs, outputs ++ [output]}}
+        {:output, {ip + 2, memory, inputs, outputs ++ [output]}}
 
       {:"jump-if-true", parameter_mode_1, parameter_mode_2} ->
         condition = get(memory, ip + 1, parameter_mode_1)
