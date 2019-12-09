@@ -36,18 +36,15 @@ defmodule AoC2019 do
   [[1]]
 
   iex> AoC2019.permutation(1..3)
-  [[3, 1, 2], [3, 2, 1], [2, 3, 1], [2, 1, 3], [1, 3, 2], [1, 2, 3]]
+  [[1, 2, 3], [1, 3, 2], [2, 1, 3], [2, 3, 1], [3, 1, 2], [3, 2, 1]]
   """
   def permutation([]), do: [[]]
 
   def permutation(list) when is_list(list) do
-    list
-    |> to_ele_rest([], [])
-    |> Enum.flat_map(fn {ele, rest} ->
-      rest
-      |> permutation()
-      |> Enum.map(&[ele | &1])
-    end)
+    for h <- list,
+        perm <- permutation(List.delete(list, h)) do
+      [h | perm]
+    end
   end
 
   def permutation(enum) do
