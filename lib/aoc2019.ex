@@ -16,6 +16,14 @@ defmodule AoC2019 do
     |> Enum.max()
   end
 
+  def part_2(input) do
+    for sequence <- permutation(5..9) do
+      {:ok, simulator} = AmplifierSimulator.start_link(input, sequence)
+      AmplifierSimulator.result(simulator)
+    end
+    |> Enum.max()
+  end
+
   @doc """
   iex> AoC2019.permutation([])
   [[]]
