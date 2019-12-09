@@ -17,11 +17,15 @@ defmodule AoC2019 do
   end
 
   def part_2(input) do
-    for sequence <- permutation(5..9) do
-      {:ok, simulator} = AmplifierSimulator.start_link(input, sequence)
-      AmplifierSimulator.result(simulator)
-    end
-    |> Enum.max()
+    {:ok, result} =
+      permutation(5..9)
+      |> Task.async_stream(fn sequence ->
+        {:ok, simulator} = AmplifierSimulator.start_link(input, sequence)
+        AmplifierSimulator.result(simulator)
+      end)
+      |> Enum.max_by(fn {:ok, result} -> result end)
+
+    result
   end
 
   @doc """
