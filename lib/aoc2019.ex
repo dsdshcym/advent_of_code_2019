@@ -16,6 +16,16 @@ defmodule AoC2019 do
     |> Enum.max()
   end
 
+  @doc """
+  iex> AoC2019.permutation([])
+  [[]]
+
+  iex> AoC2019.permutation([1])
+  [[1]]
+
+  iex> AoC2019.permutation(1..3)
+  [[3, 1, 2], [3, 2, 1], [2, 3, 1], [2, 1, 3], [1, 3, 2], [1, 2, 3]]
+  """
   def permutation([]), do: [[]]
 
   def permutation(list) when is_list(list) do
