@@ -2,9 +2,9 @@ defmodule IntcodeMachineServer do
   use GenServer
 
   def start_link(input, initial_inputs \\ []) do
-    {ip, memory, _, _} = IntcodeMachine.parse(input)
+    machine = IntcodeMachine.parse(input, initial_inputs)
 
-    GenServer.start_link(__MODULE__, {ip, memory, initial_inputs})
+    GenServer.start_link(__MODULE__, machine)
   end
 
   def connect_to(machine, another_machine) do
@@ -20,14 +20,8 @@ defmodule IntcodeMachineServer do
   end
 
   @impl true
-  def init({ip, memory, inputs}) do
-    {:ok,
-     %{
-       ip: ip,
-       memory: memory,
-       inputs: inputs,
-       output_targets: []
-     }}
+  def init(machine) do
+    {:ok, %{machine: machine, output_targets: []}}
   end
 
   @impl true
@@ -38,7 +32,11 @@ defmodule IntcodeMachineServer do
   def handle_cast({:output, value}, %{input_callback: input_callback} = state) do
     {new_ip, new_memory} = input_callback.(value)
 
-    do_run(%{state | ip: new_ip, memory: new_memory, input_callback: nil})
+    do_run(%{
+      state
+      | machine: %{state.machine | ip: new_ip, memory: new_memory},
+        input_callback: nil
+    })
   end
 
   def handle_cast(:run, state) do
@@ -46,22 +44,24 @@ defmodule IntcodeMachineServer do
   end
 
   defp do_run(state) do
-    case IntcodeMachine.step({state.ip, state.memory, state.inputs, []}) do
-      {:ok, {new_ip, new_memory, new_inputs, []}} ->
-        do_run(%{state | ip: new_ip, memory: new_memory, inputs: new_inputs})
+    case IntcodeMachine.step(state.machine) do
+      {:ok, new_machine} ->
+        do_run(%{state | machine: new_machine})
 
-      {:output, {new_ip, new_memory, new_inputs, [output]}} ->
+      {:output, new_machine} ->
+        output = List.last(new_machine.outputs)
+
         for target <- state.output_targets do
           output_to(target, output)
         end
 
-        do_run(%{state | ip: new_ip, memory: new_memory, inputs: new_inputs})
+        do_run(%{state | machine: new_machine})
 
       {:await_on_input, input_callback} ->
         {:noreply, Map.put(state, :input_callback, input_callback)}
 
-      {:halt, {new_ip, new_memory, inputs, []}} ->
-        {:stop, :normal, %{state | ip: new_ip, memory: new_memory, inputs: inputs}}
+      {:halt, new_machine} ->
+        {:stop, :normal, %{state | machine: new_machine}}
     end
   end
 end

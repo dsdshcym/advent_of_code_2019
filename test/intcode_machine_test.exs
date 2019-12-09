@@ -6,53 +6,58 @@ defmodule IntcodeMachineTest do
   describe "parse/1" do
     test "returns a values by address map" do
       assert IntcodeMachine.parse("3,225,1,225") ==
-               {0, %{0 => 3, 1 => 225, 2 => 1, 3 => 225}, [1], []}
+               %IntcodeMachine{
+                 ip: 0,
+                 memory: %{0 => 3, 1 => 225, 2 => 1, 3 => 225},
+                 inputs: [1],
+                 outputs: []
+               }
     end
   end
 
   describe "step/1" do
     test "plus" do
-      {:ok, {ip, memory, _, _}} =
-        IntcodeMachine.step(build(:simulator, 0, build(:memory, [1, 2, 3, 0])))
+      {:ok, %{ip: ip, memory: memory}} =
+        IntcodeMachine.step(build(:machine, 0, build(:memory, [1, 2, 3, 0])))
 
       assert ip == 4
       assert memory == build(:memory, [3, 2, 3, 0])
     end
 
     test "plus with immediate mode" do
-      {:ok, {ip, memory, _, _}} =
-        IntcodeMachine.step(build(:simulator, 0, build(:memory, [1101, 30, 23, 0])))
+      {:ok, %{ip: ip, memory: memory}} =
+        IntcodeMachine.step(build(:machine, 0, build(:memory, [1101, 30, 23, 0])))
 
       assert ip == 4
       assert memory == build(:memory, [53, 30, 23, 0])
     end
 
     test "multiply" do
-      {:ok, {ip, memory, _, _}} =
-        IntcodeMachine.step(build(:simulator, 1, build(:memory, [0, 2, 2, 3, 0])))
+      {:ok, %{ip: ip, memory: memory}} =
+        IntcodeMachine.step(build(:machine, 1, build(:memory, [0, 2, 2, 3, 0])))
 
       assert ip == 5
       assert memory == build(:memory, [6, 2, 2, 3, 0])
     end
 
     test "multiply with immediate mode" do
-      {:ok, {ip, memory, _, _}} =
-        IntcodeMachine.step(build(:simulator, 0, build(:memory, [1102, 3, 13, 0])))
+      {:ok, %{ip: ip, memory: memory}} =
+        IntcodeMachine.step(build(:machine, 0, build(:memory, [1102, 3, 13, 0])))
 
       assert ip == 4
       assert memory == build(:memory, [39, 3, 13, 0])
     end
 
     test "input" do
-      {:ok, {ip, memory, rest_inputs, _}} =
-        IntcodeMachine.step(build(:simulator, 0, build(:memory, [3, 1]), [30, 2]))
+      {:ok, %{ip: ip, memory: memory, inputs: rest_inputs}} =
+        IntcodeMachine.step(build(:machine, 0, build(:memory, [3, 1]), [30, 2]))
 
       assert ip == 2
       assert memory == build(:memory, [3, 30])
       assert rest_inputs == [2]
 
       assert {:await_on_input, input_callback} =
-               IntcodeMachine.step(build(:simulator, 0, build(:memory, [3, 1]), []))
+               IntcodeMachine.step(build(:machine, 0, build(:memory, [3, 1]), []))
 
       assert {ip, memory} = input_callback.(30)
       assert ip == 2
@@ -60,8 +65,8 @@ defmodule IntcodeMachineTest do
     end
 
     test "output" do
-      {:output, {ip, memory, _, new_output}} =
-        IntcodeMachine.step(build(:simulator, 0, build(:memory, [4, 0]), [], [2]))
+      {:output, %{ip: ip, memory: memory, outputs: new_output}} =
+        IntcodeMachine.step(build(:machine, 0, build(:memory, [4, 0]), [], [2]))
 
       assert ip == 2
       assert memory == build(:memory, [4, 0])
@@ -69,56 +74,56 @@ defmodule IntcodeMachineTest do
     end
 
     test "jump-if-true" do
-      {:ok, {ip, memory, _, _}} =
-        IntcodeMachine.step(build(:simulator, 0, build(:memory, [5, 2, 0]), [1], [2]))
+      {:ok, %{ip: ip, memory: memory}} =
+        IntcodeMachine.step(build(:machine, 0, build(:memory, [5, 2, 0]), [1], [2]))
 
       assert ip == 3
       assert memory == build(:memory, [5, 2, 0])
 
-      {:ok, {ip, memory, _, _}} =
-        IntcodeMachine.step(build(:simulator, 0, build(:memory, [105, 2, 0]), [1], [2]))
+      {:ok, %{ip: ip, memory: memory}} =
+        IntcodeMachine.step(build(:machine, 0, build(:memory, [105, 2, 0]), [1], [2]))
 
       assert ip == 105
       assert memory == build(:memory, [105, 2, 0])
     end
 
     test "jump-if-false" do
-      {:ok, {ip, memory, _, _}} =
-        IntcodeMachine.step(build(:simulator, 0, build(:memory, [6, 2, 0]), [1], [2]))
+      {:ok, %{ip: ip, memory: memory}} =
+        IntcodeMachine.step(build(:machine, 0, build(:memory, [6, 2, 0]), [1], [2]))
 
       assert ip == 6
       assert memory == build(:memory, [6, 2, 0])
 
-      {:ok, {ip, memory, _, _}} =
-        IntcodeMachine.step(build(:simulator, 0, build(:memory, [1106, 2, 0]), [1], [2]))
+      {:ok, %{ip: ip, memory: memory}} =
+        IntcodeMachine.step(build(:machine, 0, build(:memory, [1106, 2, 0]), [1], [2]))
 
       assert ip == 3
       assert memory == build(:memory, [1106, 2, 0])
     end
 
     test "less than" do
-      {:ok, {ip, memory, _, _}} =
-        IntcodeMachine.step(build(:simulator, 0, build(:memory, [1107, 2, 0, 1]), [1], [2]))
+      {:ok, %{ip: ip, memory: memory}} =
+        IntcodeMachine.step(build(:machine, 0, build(:memory, [1107, 2, 0, 1]), [1], [2]))
 
       assert ip == 4
       assert memory == build(:memory, [1107, 0, 0, 1])
 
-      {:ok, {ip, memory, _, _}} =
-        IntcodeMachine.step(build(:simulator, 0, build(:memory, [1107, -2, 0, 2]), [1], [2]))
+      {:ok, %{ip: ip, memory: memory}} =
+        IntcodeMachine.step(build(:machine, 0, build(:memory, [1107, -2, 0, 2]), [1], [2]))
 
       assert ip == 4
       assert memory == build(:memory, [1107, -2, 1, 2])
     end
 
     test "equals" do
-      {:ok, {ip, memory, _, _}} =
-        IntcodeMachine.step(build(:simulator, 0, build(:memory, [1108, 0, 0, 2]), [1], [2]))
+      {:ok, %{ip: ip, memory: memory}} =
+        IntcodeMachine.step(build(:machine, 0, build(:memory, [1108, 0, 0, 2]), [1], [2]))
 
       assert ip == 4
       assert memory == build(:memory, [1108, 0, 1, 2])
 
-      {:ok, {ip, memory, _, _}} =
-        IntcodeMachine.step(build(:simulator, 0, build(:memory, [1108, 3, 0, 1]), [1], [2]))
+      {:ok, %{ip: ip, memory: memory}} =
+        IntcodeMachine.step(build(:machine, 0, build(:memory, [1108, 3, 0, 1]), [1], [2]))
 
       assert ip == 4
       assert memory == build(:memory, [1108, 0, 0, 1])
@@ -174,7 +179,7 @@ defmodule IntcodeMachineTest do
     |> Map.new()
   end
 
-  def build(:simulator, ip, memory, input \\ [], output \\ []) do
-    {ip, memory, input, output}
+  def build(:machine, ip, memory, input \\ [], output \\ []) do
+    %IntcodeMachine{ip: ip, memory: memory, inputs: input, outputs: output}
   end
 end

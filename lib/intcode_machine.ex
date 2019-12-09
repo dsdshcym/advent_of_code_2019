@@ -1,15 +1,11 @@
 defmodule IntcodeMachine do
+  defstruct ip: 0, memory: %{}, inputs: [], outputs: []
+
   def new(input) do
-    memory =
-      input
-      |> String.split(",")
-      |> Enum.map(&String.to_integer/1)
-      |> Enum.with_index()
-      |> Enum.map(fn {value, address} -> {address, value} end)
-      |> Map.new()
+    machine = parse(input)
 
     fn inputs ->
-      {_ip, _memory, _inputs, outputs} = run({0, memory, inputs, []})
+      %{outputs: outputs} = run(%{machine | inputs: inputs})
 
       outputs
     end
@@ -26,86 +22,91 @@ defmodule IntcodeMachine do
       |> Enum.map(fn {value, address} -> {address, value} end)
       |> Map.new()
 
-    {0, memory, inputs, []}
+    %__MODULE__{memory: memory, inputs: inputs}
   end
 
-  def run(simulator) do
-    case step(simulator) do
-      {:halt, new_simulator} -> new_simulator
-      {_operation, new_simulator} -> run(new_simulator)
+  def run(machine) do
+    case step(machine) do
+      {:halt, new_machine} -> new_machine
+      {_operation, new_machine} -> run(new_machine)
     end
   end
 
-  def step({ip, memory, inputs, outputs}) do
-    case to_operation(memory[ip]) do
+  def step(m) do
+    case to_operation(m.memory[m.ip]) do
       {:plus, parameter_mode_1, parameter_mode_2} ->
-        a = get(memory, ip + 1, parameter_mode_1)
-        b = get(memory, ip + 2, parameter_mode_2)
+        a = get(m.memory, m.ip + 1, parameter_mode_1)
+        b = get(m.memory, m.ip + 2, parameter_mode_2)
 
-        {:ok, {ip + 4, Map.put(memory, memory[ip + 3], a + b), inputs, outputs}}
+        {:ok,
+         %{
+           m
+           | ip: m.ip + 4,
+             memory: Map.put(m.memory, m.memory[m.ip + 3], a + b)
+         }}
 
       {:multiply, parameter_mode_1, parameter_mode_2} ->
-        a = get(memory, ip + 1, parameter_mode_1)
-        b = get(memory, ip + 2, parameter_mode_2)
+        a = get(m.memory, m.ip + 1, parameter_mode_1)
+        b = get(m.memory, m.ip + 2, parameter_mode_2)
 
-        {:ok, {ip + 4, Map.put(memory, memory[ip + 3], a * b), inputs, outputs}}
+        {:ok, %{m | ip: m.ip + 4, memory: Map.put(m.memory, m.memory[m.ip + 3], a * b)}}
 
       :input ->
-        cp = memory[ip + 1]
+        cp = m.memory[m.ip + 1]
 
-        case inputs do
+        case m.inputs do
           [i | rest_inputs] ->
-            {:ok, {ip + 2, Map.put(memory, cp, i), rest_inputs, outputs}}
+            {:ok, %{m | ip: m.ip + 2, memory: Map.put(m.memory, cp, i), inputs: rest_inputs}}
 
           [] ->
-            input_callback = fn i -> {ip + 2, Map.put(memory, cp, i)} end
+            input_callback = fn i -> {m.ip + 2, Map.put(m.memory, cp, i)} end
 
             {:await_on_input, input_callback}
         end
 
       {:output, parameter_mode} ->
-        output = get(memory, ip + 1, parameter_mode)
+        output = get(m.memory, m.ip + 1, parameter_mode)
 
-        {:output, {ip + 2, memory, inputs, outputs ++ [output]}}
+        {:output, %{m | ip: m.ip + 2, memory: m.memory, outputs: m.outputs ++ [output]}}
 
       {:"jump-if-true", parameter_mode_1, parameter_mode_2} ->
-        condition = get(memory, ip + 1, parameter_mode_1)
+        condition = get(m.memory, m.ip + 1, parameter_mode_1)
 
         new_ip =
           if condition != 0,
-            do: get(memory, ip + 2, parameter_mode_2),
-            else: ip + 3
+            do: get(m.memory, m.ip + 2, parameter_mode_2),
+            else: m.ip + 3
 
-        {:ok, {new_ip, memory, inputs, outputs}}
+        {:ok, %{m | ip: new_ip}}
 
       {:"jump-if-false", parameter_mode_1, parameter_mode_2} ->
-        condition = get(memory, ip + 1, parameter_mode_1)
+        condition = get(m.memory, m.ip + 1, parameter_mode_1)
 
         new_ip =
           if condition == 0,
-            do: get(memory, ip + 2, parameter_mode_2),
-            else: ip + 3
+            do: get(m.memory, m.ip + 2, parameter_mode_2),
+            else: m.ip + 3
 
-        {:ok, {new_ip, memory, inputs, outputs}}
+        {:ok, %{m | ip: new_ip}}
 
       {:"less than", parameter_mode_1, parameter_mode_2} ->
-        a = get(memory, ip + 1, parameter_mode_1)
-        b = get(memory, ip + 2, parameter_mode_2)
+        a = get(m.memory, m.ip + 1, parameter_mode_1)
+        b = get(m.memory, m.ip + 2, parameter_mode_2)
 
         result = if a < b, do: 1, else: 0
 
-        {:ok, {ip + 4, Map.put(memory, memory[ip + 3], result), inputs, outputs}}
+        {:ok, %{m | ip: m.ip + 4, memory: Map.put(m.memory, m.memory[m.ip + 3], result)}}
 
       {:equals, parameter_mode_1, parameter_mode_2} ->
-        a = get(memory, ip + 1, parameter_mode_1)
-        b = get(memory, ip + 2, parameter_mode_2)
+        a = get(m.memory, m.ip + 1, parameter_mode_1)
+        b = get(m.memory, m.ip + 2, parameter_mode_2)
 
         result = if a == b, do: 1, else: 0
 
-        {:ok, {ip + 4, Map.put(memory, memory[ip + 3], result), inputs, outputs}}
+        {:ok, %{m | ip: m.ip + 4, memory: Map.put(m.memory, m.memory[m.ip + 3], result)}}
 
       :halt ->
-        {:halt, {ip + 1, memory, inputs, outputs}}
+        {:halt, %{m | ip: m.ip + 1}}
     end
   end
 
