@@ -35,8 +35,8 @@ defmodule IntcodeMachine do
   def step(m) do
     case to_operation(m.memory[m.ip]) do
       {:plus, parameter_mode_1, parameter_mode_2} ->
-        a = get(m.memory, m.ip + 1, parameter_mode_1)
-        b = get(m.memory, m.ip + 2, parameter_mode_2)
+        a = get(m, m.ip + 1, parameter_mode_1)
+        b = get(m, m.ip + 2, parameter_mode_2)
 
         {:ok,
          %{
@@ -46,8 +46,8 @@ defmodule IntcodeMachine do
          }}
 
       {:multiply, parameter_mode_1, parameter_mode_2} ->
-        a = get(m.memory, m.ip + 1, parameter_mode_1)
-        b = get(m.memory, m.ip + 2, parameter_mode_2)
+        a = get(m, m.ip + 1, parameter_mode_1)
+        b = get(m, m.ip + 2, parameter_mode_2)
 
         {:ok, %{m | ip: m.ip + 4, memory: Map.put(m.memory, m.memory[m.ip + 3], a * b)}}
 
@@ -65,41 +65,41 @@ defmodule IntcodeMachine do
         end
 
       {:output, parameter_mode} ->
-        output = get(m.memory, m.ip + 1, parameter_mode)
+        output = get(m, m.ip + 1, parameter_mode)
 
         {:output, %{m | ip: m.ip + 2, memory: m.memory, outputs: m.outputs ++ [output]}}
 
       {:"jump-if-true", parameter_mode_1, parameter_mode_2} ->
-        condition = get(m.memory, m.ip + 1, parameter_mode_1)
+        condition = get(m, m.ip + 1, parameter_mode_1)
 
         new_ip =
           if condition != 0,
-            do: get(m.memory, m.ip + 2, parameter_mode_2),
+            do: get(m, m.ip + 2, parameter_mode_2),
             else: m.ip + 3
 
         {:ok, %{m | ip: new_ip}}
 
       {:"jump-if-false", parameter_mode_1, parameter_mode_2} ->
-        condition = get(m.memory, m.ip + 1, parameter_mode_1)
+        condition = get(m, m.ip + 1, parameter_mode_1)
 
         new_ip =
           if condition == 0,
-            do: get(m.memory, m.ip + 2, parameter_mode_2),
+            do: get(m, m.ip + 2, parameter_mode_2),
             else: m.ip + 3
 
         {:ok, %{m | ip: new_ip}}
 
       {:"less than", parameter_mode_1, parameter_mode_2} ->
-        a = get(m.memory, m.ip + 1, parameter_mode_1)
-        b = get(m.memory, m.ip + 2, parameter_mode_2)
+        a = get(m, m.ip + 1, parameter_mode_1)
+        b = get(m, m.ip + 2, parameter_mode_2)
 
         result = if a < b, do: 1, else: 0
 
         {:ok, %{m | ip: m.ip + 4, memory: Map.put(m.memory, m.memory[m.ip + 3], result)}}
 
       {:equals, parameter_mode_1, parameter_mode_2} ->
-        a = get(m.memory, m.ip + 1, parameter_mode_1)
-        b = get(m.memory, m.ip + 2, parameter_mode_2)
+        a = get(m, m.ip + 1, parameter_mode_1)
+        b = get(m, m.ip + 2, parameter_mode_2)
 
         result = if a == b, do: 1, else: 0
 
@@ -154,11 +154,15 @@ defmodule IntcodeMachine do
 
   defp pad_leading(list, _, _), do: list
 
-  def get(memory, address, 0) do
-    memory[memory[address]]
+  def get(machine, address, 0) do
+    target = machine.memory[address]
+
+    Map.get(machine.memory, target, 0)
   end
 
-  def get(memory, address, 1) do
-    memory[address]
+  def get(machine, address, 1) do
+    target = address
+
+    Map.get(machine.memory, target, 0)
   end
 end
