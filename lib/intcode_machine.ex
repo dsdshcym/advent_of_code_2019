@@ -34,25 +34,27 @@ defmodule IntcodeMachine do
 
   def step(m) do
     case to_operation(m.memory[m.ip]) do
-      {:plus, parameter_mode_1, parameter_mode_2} ->
+      {:plus, parameter_mode_1, parameter_mode_2, parameter_mode_3} ->
         a = get(m, m.ip + 1, parameter_mode_1)
         b = get(m, m.ip + 2, parameter_mode_2)
+        target = target(m, m.ip + 3, parameter_mode_3)
 
         {:ok,
          %{
            m
            | ip: m.ip + 4,
-             memory: Map.put(m.memory, m.memory[m.ip + 3], a + b)
+             memory: Map.put(m.memory, target, a + b)
          }}
 
-      {:multiply, parameter_mode_1, parameter_mode_2} ->
+      {:multiply, parameter_mode_1, parameter_mode_2, parameter_mode_3} ->
         a = get(m, m.ip + 1, parameter_mode_1)
         b = get(m, m.ip + 2, parameter_mode_2)
+        target = target(m, m.ip + 3, parameter_mode_3)
 
-        {:ok, %{m | ip: m.ip + 4, memory: Map.put(m.memory, m.memory[m.ip + 3], a * b)}}
+        {:ok, %{m | ip: m.ip + 4, memory: Map.put(m.memory, target, a * b)}}
 
-      :input ->
-        cp = m.memory[m.ip + 1]
+      {:input, parameter_mode} ->
+        cp = target(m, m.ip + 1, parameter_mode)
 
         case m.inputs do
           [i | rest_inputs] ->
@@ -89,24 +91,26 @@ defmodule IntcodeMachine do
 
         {:ok, %{m | ip: new_ip}}
 
-      {:"less than", parameter_mode_1, parameter_mode_2} ->
+      {:"less than", parameter_mode_1, parameter_mode_2, parameter_mode_3} ->
         a = get(m, m.ip + 1, parameter_mode_1)
         b = get(m, m.ip + 2, parameter_mode_2)
+        target = target(m, m.ip + 3, parameter_mode_3)
 
         result = if a < b, do: 1, else: 0
 
-        {:ok, %{m | ip: m.ip + 4, memory: Map.put(m.memory, m.memory[m.ip + 3], result)}}
+        {:ok, %{m | ip: m.ip + 4, memory: Map.put(m.memory, target, result)}}
 
-      {:equals, parameter_mode_1, parameter_mode_2} ->
+      {:equals, parameter_mode_1, parameter_mode_2, parameter_mode_3} ->
         a = get(m, m.ip + 1, parameter_mode_1)
         b = get(m, m.ip + 2, parameter_mode_2)
+        target = target(m, m.ip + 3, parameter_mode_3)
 
         result = if a == b, do: 1, else: 0
 
-        {:ok, %{m | ip: m.ip + 4, memory: Map.put(m.memory, m.memory[m.ip + 3], result)}}
+        {:ok, %{m | ip: m.ip + 4, memory: Map.put(m.memory, target, result)}}
 
-      :"adjust-relative-base" ->
-        delta = m.memory[m.ip + 1]
+      {:"adjust-relative-base", parameter_mode} ->
+        delta = get(m, m.ip + 1, parameter_mode)
         {:ok, %{m | ip: m.ip + 2, relative_base: m.relative_base + delta}}
 
       :halt ->
@@ -116,14 +120,14 @@ defmodule IntcodeMachine do
 
   def to_operation(opcode) do
     case opcode |> Integer.digits() |> pad_leading(5, 0) do
-      [0, parameter_mode_2, parameter_mode_1, 0, 1] ->
-        {:plus, parameter_mode_1, parameter_mode_2}
+      [parameter_mode_3, parameter_mode_2, parameter_mode_1, 0, 1] ->
+        {:plus, parameter_mode_1, parameter_mode_2, parameter_mode_3}
 
-      [0, parameter_mode_2, parameter_mode_1, 0, 2] ->
-        {:multiply, parameter_mode_1, parameter_mode_2}
+      [parameter_mode_3, parameter_mode_2, parameter_mode_1, 0, 2] ->
+        {:multiply, parameter_mode_1, parameter_mode_2, parameter_mode_3}
 
-      [_, _, _, 0, 3] ->
-        :input
+      [_, _, parameter_mode, 0, 3] ->
+        {:input, parameter_mode}
 
       [_, _, parameter_mode, 0, 4] ->
         {:output, parameter_mode}
@@ -134,14 +138,14 @@ defmodule IntcodeMachine do
       [_, parameter_mode_2, parameter_mode_1, 0, 6] ->
         {:"jump-if-false", parameter_mode_1, parameter_mode_2}
 
-      [_, parameter_mode_2, parameter_mode_1, 0, 7] ->
-        {:"less than", parameter_mode_1, parameter_mode_2}
+      [parameter_mode_3, parameter_mode_2, parameter_mode_1, 0, 7] ->
+        {:"less than", parameter_mode_1, parameter_mode_2, parameter_mode_3}
 
-      [_, parameter_mode_2, parameter_mode_1, 0, 8] ->
-        {:equals, parameter_mode_1, parameter_mode_2}
+      [parameter_mode_3, parameter_mode_2, parameter_mode_1, 0, 8] ->
+        {:equals, parameter_mode_1, parameter_mode_2, parameter_mode_3}
 
-      [_, _, _, 0, 9] ->
-        :"adjust-relative-base"
+      [_, _, parameter_mode, 0, 9] ->
+        {:"adjust-relative-base", parameter_mode}
 
       [_, _, _, 9, 9] ->
         :halt
@@ -154,21 +158,19 @@ defmodule IntcodeMachine do
 
   defp pad_leading(list, _, _), do: list
 
-  def get(machine, address, 0) do
-    target = machine.memory[address]
-
-    Map.get(machine.memory, target, 0)
+  def get(machine, address, mode) do
+    Map.get(machine.memory, target(machine, address, mode), 0)
   end
 
-  def get(machine, address, 1) do
-    target = address
-
-    Map.get(machine.memory, target, 0)
+  def target(machine, address, 0) do
+    machine.memory[address]
   end
 
-  def get(machine, address, 2) do
-    target = machine.memory[address] + machine.relative_base
+  def target(_machine, address, 1) do
+    address
+  end
 
-    Map.get(machine.memory, target, 0)
+  def target(machine, address, 2) do
+    machine.memory[address] + machine.relative_base
   end
 end
