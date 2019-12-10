@@ -198,6 +198,10 @@ defmodule IntcodeMachineTest do
 
       assert IntcodeMachine.new(@boost).([1]) == [2_745_604_242]
     end
+
+    test "part 2" do
+      assert IntcodeMachine.new(@boost).([2]) == [51135]
+    end
   end
 
   def build(:memory, list) do
