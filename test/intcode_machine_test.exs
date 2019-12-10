@@ -128,6 +128,13 @@ defmodule IntcodeMachineTest do
       assert ip == 4
       assert memory == build(:memory, [1108, 0, 0, 1])
     end
+
+    test "adjusts the relative base" do
+      {:ok, machine} = IntcodeMachine.step(build(:machine, 0, build(:memory, [109, 19])))
+
+      assert machine.ip == 2
+      assert machine.relative_base == 19
+    end
   end
 
   describe "new/1" do

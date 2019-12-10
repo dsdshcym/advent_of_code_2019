@@ -1,5 +1,5 @@
 defmodule IntcodeMachine do
-  defstruct ip: 0, memory: %{}, inputs: [], outputs: []
+  defstruct ip: 0, memory: %{}, inputs: [], outputs: [], relative_base: 0
 
   def new(input) do
     machine = parse(input)
@@ -105,6 +105,10 @@ defmodule IntcodeMachine do
 
         {:ok, %{m | ip: m.ip + 4, memory: Map.put(m.memory, m.memory[m.ip + 3], result)}}
 
+      :"adjust-relative-base" ->
+        delta = m.memory[m.ip + 1]
+        {:ok, %{m | ip: m.ip + 2, relative_base: m.relative_base + delta}}
+
       :halt ->
         {:halt, %{m | ip: m.ip + 1}}
     end
@@ -135,6 +139,9 @@ defmodule IntcodeMachine do
 
       [_, parameter_mode_2, parameter_mode_1, 0, 8] ->
         {:equals, parameter_mode_1, parameter_mode_2}
+
+      [_, _, _, 0, 9] ->
+        :"adjust-relative-base"
 
       [_, _, _, 9, 9] ->
         :halt
