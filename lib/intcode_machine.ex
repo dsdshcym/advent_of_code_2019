@@ -165,4 +165,10 @@ defmodule IntcodeMachine do
 
     Map.get(machine.memory, target, 0)
   end
+
+  def get(machine, address, 2) do
+    target = machine.memory[address] + machine.relative_base
+
+    Map.get(machine.memory, target, 0)
+  end
 end
