@@ -11,6 +11,44 @@ defmodule AoC2019 do
     |> Enum.max()
   end
 
+  def p2(input, vaporized_index \\ 200) do
+    asteroids = parse(input)
+
+    center = Enum.max_by(asteroids, &detectable_count(&1, List.delete(asteroids, &1)))
+
+    {x, y} =
+      asteroids
+      |> List.delete(center)
+      |> vaporize_queue(center)
+      |> Enum.at(vaporized_index - 1)
+
+    x * 100 + y
+  end
+
+  defp vaporize_queue([], _center), do: []
+
+  defp vaporize_queue(others, center) do
+    {detectables, undetectables} =
+      Enum.split_with(others, &detectable?(center, &1, List.delete(others, &1)))
+
+    sort_clockwise_around(detectables, center) ++ vaporize_queue(undetectables, center)
+  end
+
+  defp sort_clockwise_around(asteroids, {xc, yc}) do
+    {right, left} =
+      Enum.split_with(asteroids, fn
+        {^xc, yo} -> yo < yc
+        {xo, _yo} -> xo > xc
+      end)
+
+    Enum.sort_by(right, & &1, fn {x1, y1}, {x2, y2} ->
+      (xc - x1) * (yc - y2) > (xc - x2) * (yc - y1)
+    end) ++
+      Enum.sort_by(left, & &1, fn {x1, y1}, {x2, y2} ->
+        (xc - x1) * (yc - y2) > (xc - x2) * (yc - y1)
+      end)
+  end
+
   defp parse(input) do
     input
     |> String.trim_trailing()
