@@ -13,6 +13,33 @@ defmodule PaintingRobot do
     |> Enum.count()
   end
 
+  def p2(input) do
+    computer = IntcodeMachine.parse(input)
+
+    robot =
+      new(%{{0, 0} => 1})
+      |> run(computer)
+
+    robot.panels
+    |> to_s()
+  end
+
+  defp to_s(panels) do
+    {min_x, max_x} = panels |> Map.keys() |> Enum.map(fn {x, _} -> x end) |> Enum.min_max()
+    {min_y, max_y} = panels |> Map.keys() |> Enum.map(fn {_, y} -> y end) |> Enum.min_max()
+
+    for y <- max_y..min_y do
+      for x <- min_x..max_x do
+        case Map.get(panels, {x, y}, 0) do
+          0 -> " "
+          1 -> "*"
+        end
+      end
+      |> Enum.join("")
+    end
+    |> Enum.join("\n")
+  end
+
   def new(panels) do
     %__MODULE__{panels: panels}
   end

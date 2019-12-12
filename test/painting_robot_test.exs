@@ -6,4 +6,8 @@ defmodule PaintingRobotTest do
   test "part 1" do
     assert PaintingRobot.p1(@program) == 2720
   end
+
+  test "part 2" do
+    IO.puts(PaintingRobot.p2(@program))
+  end
 end
