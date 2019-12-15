@@ -7,4 +7,35 @@ defmodule AoC2019Test do
   test "part 1" do
     assert AoC2019.p1(@input) == 315
   end
+
+  test "part 2" do
+    "1" <> rest = @input
+
+    assert AoC2019.arcade_cabinet("2" <> rest)
+           |> AoC2019.to_s() ==
+             "0
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+X                                          X
+X   #  # #  # #  ## # ##    #  ### # # ### X
+X   ##    ###  # #    ####  # ####   # #   X
+X #   # ###  # #    ##  ##  #    ## #  #   X
+X  # ##   # ### # #### ###     # # # ##  # X
+X     # ##  # # ##    ## ### ## ##  ##   # X
+X  ###     ##  #   ## ##  #  #   ## ### #  X
+X  #  # ##### #    ####### ####### #   ### X
+X #  ### ### ##   # ## # ### #      # #### X
+X  #### #### ###   #     ######  # #####   X
+X  #####  ##  ## #    ## # #### #  ## ## # X
+X # ##  # # ## # # ##  #### ### ##   ##  # X
+X #  #####  #  ### # # #   #    #### ##    X
+X  #  ## # # ##  # #  ######    ##### # ## X
+X   #######  #    # #### # #  # ####   ### X
+X   ## # ## # #   # # ## #  #  # # ###  ## X
+X                                          X
+X                                          X
+X                    o                     X
+X                                          X
+X                      -                   X
+X                                          X"
+  end
 end
