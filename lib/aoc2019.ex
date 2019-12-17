@@ -10,6 +10,29 @@ defmodule AoC2019 do
     |> ore_required()
   end
 
+  def p2(input) do
+    diagraph =
+      input
+      |> to_menu()
+      |> to_digraph()
+
+    min_amount = div(1_000_000_000_000, ore_required(diagraph))
+
+    Stream.unfold({min_amount + 1, min_amount}, fn
+      {same, same} ->
+        nil
+
+      {current, previous} when previous < current ->
+        case ore_required(diagraph, current) do
+          1_000_000_000_000 -> {current, {current, current}}
+          ore when ore > 1_000_000_000_000 -> {previous, {div(current + previous, 2), previous}}
+          ore when ore < 1_000_000_000_000 -> {current, {current * 2, current}}
+        end
+    end)
+    |> Enum.to_list()
+    |> List.last()
+  end
+
   def to_menu(input) do
     input
     |> String.split("\n")
