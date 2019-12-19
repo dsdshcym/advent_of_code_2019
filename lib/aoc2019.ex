@@ -96,13 +96,13 @@ defmodule AoC2019 do
     |> Enum.map(&Moon.new/1)
   end
 
-  def run(moons, 0), do: moons
 
   def run(moons, step) do
-    moons
-    |> apply_gravities()
-    |> apply_velocities()
-    |> run(step - 1)
+    moons |> stream() |> Enum.at(step)
+  end
+
+  def stream(moons) do
+    Stream.iterate(moons, &(&1 |> apply_gravities() |> apply_velocities()))
   end
 
   def apply_gravities(moons) do
