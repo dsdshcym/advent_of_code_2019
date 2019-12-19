@@ -7,4 +7,8 @@ defmodule AoC2019Test do
   test "part 1" do
     assert AoC2019.p1(@input) == 234
   end
+
+  test "part 2" do
+    assert AoC2019.p2(@input) == 234
+  end
 end
