@@ -28,6 +28,7 @@ defmodule IntcodeMachine do
   def run(machine) do
     case step(machine) do
       {:halt, new_machine} -> new_machine
+      {:await_on_input, new_machine} -> {:await_on_input, new_machine}
       {_operation, new_machine} -> run(new_machine)
     end
   end
@@ -61,9 +62,7 @@ defmodule IntcodeMachine do
             {:ok, %{m | ip: m.ip + 2, memory: Map.put(m.memory, cp, i), inputs: rest_inputs}}
 
           [] ->
-            input_callback = fn i -> {m.ip + 2, Map.put(m.memory, cp, i)} end
-
-            {:await_on_input, input_callback}
+            {:await_on_input, m}
         end
 
       {:output, parameter_mode} ->

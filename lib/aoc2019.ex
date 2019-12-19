@@ -3,59 +3,40 @@ defmodule AoC2019 do
   Documentation for AoC2019.
   """
 
-  def part_1(input) do
-    amplifier = IntcodeMachine.new(input)
+  def p1(input) do
+    m = IntcodeMachine.parse(input)
 
-    for sequence <- permutation(0..4) do
-      sequence
-      |> Enum.reduce(0, fn phase_setting, input ->
-        [output] = amplifier.([phase_setting, input])
-        output
-      end)
-    end
-    |> Enum.max()
+    bfs([%{status: 1, pos: {0, 0}, machine: m, step: 0}], MapSet.new())
   end
 
-  def part_2(input) do
-    {:ok, result} =
-      permutation(5..9)
-      |> Task.async_stream(fn sequence ->
-        {:ok, simulator} = AmplifierSimulator.start_link(input, sequence)
-        AmplifierSimulator.result(simulator)
-      end)
-      |> Enum.max_by(fn {:ok, result} -> result end)
+  def bfs([%{status: 2, step: step} | _], _), do: step
+  def bfs([%{status: 0} | rest], visited), do: bfs(rest, visited)
 
-    result
-  end
+  def bfs([current | rest], visited) do
+    if MapSet.member?(visited, current.pos) do
+      bfs(rest, visited)
+    else
+      next_robots =
+        for direction <- 1..4,
+            new_pos = move(current.pos, direction),
+            {:await_on_input, machine} =
+              IntcodeMachine.run(%{current.machine | inputs: [direction]}),
+            [status] = machine.outputs do
+          %{
+            current
+            | step: current.step + 1,
+              pos: new_pos,
+              status: status,
+              machine: %{machine | outputs: []}
+          }
+        end
 
-  @doc """
-  iex> AoC2019.permutation([])
-  [[]]
-
-  iex> AoC2019.permutation([1])
-  [[1]]
-
-  iex> AoC2019.permutation(1..3)
-  [[1, 2, 3], [1, 3, 2], [2, 1, 3], [2, 3, 1], [3, 1, 2], [3, 2, 1]]
-  """
-  def permutation([]), do: [[]]
-
-  def permutation(list) when is_list(list) do
-    for h <- list,
-        perm <- permutation(List.delete(list, h)) do
-      [h | perm]
+      bfs(rest ++ next_robots, MapSet.put(visited, current.pos))
     end
   end
 
-  def permutation(enum) do
-    enum
-    |> Enum.to_list()
-    |> permutation()
-  end
-
-  def to_ele_rest([], _, results), do: results
-
-  def to_ele_rest([head | rest], previous, results) do
-    to_ele_rest(rest, [head | previous], [{head, previous ++ rest} | results])
-  end
+  def move({x, y}, 1), do: {x, y - 1}
+  def move({x, y}, 2), do: {x, y + 1}
+  def move({x, y}, 3), do: {x - 1, y}
+  def move({x, y}, 4), do: {x + 1, y}
 end
