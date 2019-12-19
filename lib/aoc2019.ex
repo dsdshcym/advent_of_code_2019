@@ -3,6 +3,32 @@ defmodule AoC2019 do
   Documentation for AoC2019.
   """
 
+  def p2(input) do
+    input
+    |> IntcodeMachine.parse()
+    |> beam()
+    |> Enum.reduce_while(%{}, fn {x, y}, top_corners_by_pos ->
+      {tx, ty} =
+        case {top_corners_by_pos[{x - 1, y}], top_corners_by_pos[{x, y - 1}]} do
+          {nil, nil} ->
+            {x, y}
+
+          {nil, {_, uy}} ->
+            {x, uy}
+
+          {{lx, _}, nil} ->
+            {lx, y}
+
+          {{lx, ly}, {ux, uy}} ->
+            {max(lx, ux), max(ly, uy)}
+        end
+
+      if tx <= x - 100 + 1 && ty <= y - 100 + 1,
+        do: {:halt, {tx, ty}},
+        else: {:cont, Map.put(top_corners_by_pos, {x, y}, {tx, ty})}
+    end)
+  end
+
   def p1(input) do
     input
     |> IntcodeMachine.parse()
