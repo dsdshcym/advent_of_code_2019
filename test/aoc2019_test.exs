@@ -24,4 +24,11 @@ defmodule AoC2019Test do
       assert AoC2019.phase([0, 3, 4, 1, 5, 5, 1, 8]) == [0, 1, 0, 2, 9, 4, 9, 8]
     end
   end
+
+  describe "part 2" do
+    test "test input" do
+      assert AoC2019.p2(@input |> Integer.digits() |> List.duplicate(10000) |> List.flatten()) ==
+               32_749_588
+    end
+  end
 end

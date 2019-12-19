@@ -17,6 +17,30 @@ defmodule AoC2019 do
     |> Integer.undigits()
   end
 
+  def p2(digits) do
+    offset = digits |> Enum.take(7) |> Integer.undigits()
+
+    true = offset >= div(length(digits), 2)
+
+    digits
+    |> Enum.drop(offset)
+    |> Stream.iterate(&naive_phase/1)
+    |> Enum.at(100)
+    |> Enum.take(8)
+    |> Integer.undigits()
+  end
+
+  def naive_phase(digits) do
+    List.foldr(
+      digits,
+      [],
+      fn
+        digit, [] -> [digit]
+        digit, [previous | _] = rest -> [rem(previous + digit, 10) | rest]
+      end
+    )
+  end
+
   def phase_fn(length) do
     patterns =
       for i <- 1..length do
