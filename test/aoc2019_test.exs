@@ -49,6 +49,25 @@ defmodule AoC2019Test do
     end
   end
 
+  test "p2/1" do
+    assert AoC2019.p2("""
+           <x=-1, y=0, z=2>
+           <x=2, y=-10, z=-7>
+           <x=4, y=-8, z=8>
+           <x=3, y=5, z=-1>
+           """) == 2772
+
+    assert AoC2019.p2("""
+           <x=-8, y=-10, z=0>
+           <x=5, y=5, z=10>
+           <x=2, y=-7, z=3>
+           <x=9, y=-8, z=-3>
+           """) ==
+             4_686_774_924
+
+    assert AoC2019.p2(@input) == 288_684_633_706_728
+  end
+
   describe "run/2" do
     test "returns moons when step = 0" do
       assert AoC2019.run([1, 2, 3, 4], 0) == [1, 2, 3, 4]

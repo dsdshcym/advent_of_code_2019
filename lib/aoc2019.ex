@@ -89,6 +89,16 @@ defmodule AoC2019 do
     |> Enum.sum()
   end
 
+  def p2(input) do
+    moons = parse(input)
+
+    stream = stream(moons)
+
+    ~w/x y z/a
+    |> Enum.map(&cycle_time(moons, stream, &1))
+    |> lcm()
+  end
+
   def parse(input) do
     input
     |> String.trim_trailing()
@@ -96,6 +106,22 @@ defmodule AoC2019 do
     |> Enum.map(&Moon.new/1)
   end
 
+  def cycle_time(moons, stream, dimension) do
+    stream
+    |> Stream.drop(1)
+    |> Enum.find_index(fn new_moons ->
+      new_moons
+      |> Enum.zip(moons)
+      |> Enum.all?(fn {a, b} ->
+        a.position[dimension] == b.position[dimension] &&
+          a.velocity[dimension] == b.velocity[dimension]
+      end)
+    end)
+    |> Kernel.+(1)
+  end
+
+  def lcm([a]), do: a
+  def lcm([a, b | rest]), do: lcm([div(a * b, Integer.gcd(a, b)) | rest])
 
   def run(moons, step) do
     moons |> stream() |> Enum.at(step)
