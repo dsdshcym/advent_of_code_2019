@@ -25,4 +25,8 @@ defmodule AoC2019Test do
       assert AoC2019.p1(@input) == 17_321_586
     end
   end
+
+  test "p2/1" do
+    assert AoC2019.p2(@input) == 1921
+  end
 end

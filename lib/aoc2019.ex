@@ -11,6 +11,20 @@ defmodule AoC2019 do
     |> biodiversity_rating()
   end
 
+  def p2(input) do
+    world =
+      input
+      |> parse(RecursiveWorld)
+      |> stream(RecursiveWorld)
+      |> Enum.at(200)
+
+    Enum.count(
+      for {_level, grid} <- world, {_, status} <- grid, status == :bugs do
+        status
+      end
+    )
+  end
+
   def parse(input, module), do: module.parse(input)
 
   def stream(world, module) do
