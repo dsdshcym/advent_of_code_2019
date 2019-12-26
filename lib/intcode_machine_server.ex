@@ -16,7 +16,7 @@ defmodule IntcodeMachineServer do
   end
 
   def output_to(machine, value) do
-    GenServer.cast(machine, {:output, value})
+    GenServer.cast(machine, {:output, value, self()})
   end
 
   @impl true
@@ -29,7 +29,7 @@ defmodule IntcodeMachineServer do
     {:noreply, %{state | output_targets: [another_machine | output_targets]}}
   end
 
-  def handle_cast({:output, value}, state) do
+  def handle_cast({:output, value, _from}, state) do
     do_run(update_in(state.machine.inputs, &List.flatten([&1 | [value]])))
   end
 

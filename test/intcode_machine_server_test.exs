@@ -35,7 +35,7 @@ defmodule IntcodeMachineServerTest do
     IntcodeMachineServer.run(machine)
     IntcodeMachineServer.output_to(machine, input)
 
-    assert_receive({:"$gen_cast", {:output, ^output}})
+    assert_receive({:"$gen_cast", {:output, ^output, ^machine}})
     assert_receive({:EXIT, _, :normal})
   end
 end
