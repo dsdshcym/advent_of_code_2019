@@ -30,7 +30,7 @@ defmodule IntcodeMachineServer do
   end
 
   def handle_cast({:output, value}, state) do
-    do_run(update_in(state.machine.inputs, &(&1 ++ [value])))
+    do_run(update_in(state.machine.inputs, &List.flatten([&1 | [value]])))
   end
 
   def handle_cast(:run, state) do
