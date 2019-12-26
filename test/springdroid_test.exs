@@ -6,4 +6,22 @@ defmodule SpringdroidTest do
   test "part 1" do
     assert Springdroid.p1(@input) == 19_351_230
   end
+
+  describe "walk_or_jump?/1" do
+    test "##########" do
+      assert Springdroid.walk_or_jump?('##########') == {:ok, :walk}
+    end
+
+    test ".#########" do
+      assert Springdroid.walk_or_jump?('.#########') == {:error, :fall}
+    end
+
+    test "###.#.#..." do
+      assert Springdroid.walk_or_jump?('###.#.#...') == {:ok, :walk}
+    end
+  end
+
+  test "part 2" do
+    assert Springdroid.p2(@input) == 1_141_262_756
+  end
 end
