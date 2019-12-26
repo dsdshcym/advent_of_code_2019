@@ -180,4 +180,30 @@ defmodule AoC2019Test do
              |> Enum.find_index(&Kernel.==(&1, 2019)) == 1498
     end
   end
+
+  describe "r_deal_into_new_stack/1" do
+    test "returns {-1, length - 1}" do
+      assert AoC2019.r_deal_into_new_stack(10) == {-1, 9}
+    end
+  end
+
+  describe "r_cut/2" do
+    test "returns {1, count}" do
+      assert AoC2019.r_cut(10, 3) == {1, 3}
+    end
+  end
+
+  describe "r_deal_with_increment/2" do
+    test "returns {gcd, 0}" do
+      assert AoC2019.r_deal_with_increment(10, 3) == {7, 0}
+    end
+  end
+
+  test "compose/3" do
+    assert AoC2019.compose({2, 3}, {4, 5}, 10) == {8, 3}
+  end
+
+  test "p2" do
+    assert AoC2019.p2(@input) == 74_662_303_452_927
+  end
 end
