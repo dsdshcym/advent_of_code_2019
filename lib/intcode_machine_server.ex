@@ -60,6 +60,14 @@ defmodule IntcodeMachineServer do
         do_run(%{state | machine: new_machine})
 
       {:await_on_input, new_machine} ->
+        {:message_queue_len, len} = Process.info(self(), :message_queue_len)
+
+        if len == 0 do
+          for from <- state.input_froms do
+            GenServer.cast(from, {:await_on_input, self()})
+          end
+        end
+
         {:noreply, %{state | machine: new_machine}}
 
       {:halt, new_machine} ->
