@@ -61,9 +61,7 @@ defmodule IntcodeMachine do
             {:ok, %{m | ip: m.ip + 2, memory: Map.put(m.memory, cp, i), inputs: rest_inputs}}
 
           [] ->
-            input_callback = fn i -> {m.ip + 2, Map.put(m.memory, cp, i)} end
-
-            {:await_on_input, input_callback}
+            {:await_on_input, m}
         end
 
       {:output, parameter_mode} ->

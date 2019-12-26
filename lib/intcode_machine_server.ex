@@ -29,14 +29,8 @@ defmodule IntcodeMachineServer do
     {:noreply, %{state | output_targets: [another_machine | output_targets]}}
   end
 
-  def handle_cast({:output, value}, %{input_callback: input_callback} = state) do
-    {new_ip, new_memory} = input_callback.(value)
-
-    do_run(%{
-      state
-      | machine: %{state.machine | ip: new_ip, memory: new_memory},
-        input_callback: nil
-    })
+  def handle_cast({:output, value}, state) do
+    do_run(update_in(state.machine.inputs, &(&1 ++ [value])))
   end
 
   def handle_cast(:run, state) do
@@ -57,8 +51,8 @@ defmodule IntcodeMachineServer do
 
         do_run(%{state | machine: new_machine})
 
-      {:await_on_input, input_callback} ->
-        {:noreply, Map.put(state, :input_callback, input_callback)}
+      {:await_on_input, new_machine} ->
+        {:noreply, %{state | machine: new_machine}}
 
       {:halt, new_machine} ->
         {:stop, :normal, %{state | machine: new_machine}}
