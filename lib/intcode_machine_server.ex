@@ -11,6 +11,10 @@ defmodule IntcodeMachineServer do
     GenServer.cast(machine, {:connect_to, another_machine})
   end
 
+  def input_from(machine, another_machine) do
+    GenServer.cast(machine, {:input_from, another_machine})
+  end
+
   def run(machine) do
     GenServer.cast(machine, :run)
   end
@@ -21,12 +25,16 @@ defmodule IntcodeMachineServer do
 
   @impl true
   def init(machine) do
-    {:ok, %{machine: machine, output_targets: []}}
+    {:ok, %{machine: machine, output_targets: [], input_froms: []}}
   end
 
   @impl true
   def handle_cast({:connect_to, another_machine}, %{output_targets: output_targets} = state) do
     {:noreply, %{state | output_targets: [another_machine | output_targets]}}
+  end
+
+  def handle_cast({:input_from, another_machine}, %{input_froms: input_froms} = state) do
+    {:noreply, %{state | input_froms: [another_machine | input_froms]}}
   end
 
   def handle_cast({:output, value, _from}, state) do
