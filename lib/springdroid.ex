@@ -1,10 +1,9 @@
 defmodule Springdroid do
   @jump_to_d '''
-  NOT A J
-  NOT B T
-  OR T J
-  NOT C T
-  OR T J
+  OR A J
+  AND B J
+  AND C J
+  NOT J J
   AND D J
   WALK
   '''
