@@ -11,8 +11,15 @@ defmodule AoC2019 do
     |> Enum.count(&match?(:block, &1))
   end
 
+  def p2(input) do
+    input
+    |> arcade_cabinet()
+    |> play()
+    |> Map.get(:score)
+  end
+
   def arcade_cabinet(input) do
-    machine =
+    {:await_on_input, machine} =
       input
       |> IntcodeMachine.parse()
       |> IntcodeMachine.run()
@@ -25,7 +32,42 @@ defmodule AoC2019 do
         update_cabinet(cabinet, {x, y}, tile_id)
       end
     )
+    |> put_in([:machine], %{machine | outputs: []})
   end
+
+  def play(arcade_cabinet) do
+    {xb, _} = arcade_cabinet.ball
+    {xp, _} = arcade_cabinet.horizontal_paddle
+
+    case IntcodeMachine.run(%{arcade_cabinet.machine | inputs: [compare(xb, xp)]}) do
+      {:await_on_input, machine} ->
+        machine
+        |> get_updates()
+        |> Enum.reduce(
+          arcade_cabinet,
+          fn [x, y, tile_id], cabinet ->
+            update_cabinet(cabinet, {x, y}, tile_id)
+          end
+        )
+        |> put_in([:machine], %{machine | outputs: []})
+        |> play()
+
+      {:halt, _machine} ->
+        arcade_cabinet
+    end
+  end
+
+  @doc """
+  iex> AoC2019.compare(1, 2)
+  -1
+  iex> AoC2019.compare(2, 2)
+  0
+  iex> AoC2019.compare(3, 2)
+  1
+  """
+  def compare(a, b) when a < b, do: -1
+  def compare(a, b) when a == b, do: 0
+  def compare(a, b) when a > b, do: 1
 
   def get_updates(machine) do
     machine

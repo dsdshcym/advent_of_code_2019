@@ -9,6 +9,10 @@ defmodule AoC2019Test do
     assert AoC2019.p1(@input) == 315
   end
 
+  test "part 2" do
+    assert AoC2019.p2(@free_to_play) == 16136
+  end
+
   test "to_s/1" do
     assert AoC2019.arcade_cabinet(@free_to_play)
            |> AoC2019.to_s() ==
