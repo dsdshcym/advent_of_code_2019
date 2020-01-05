@@ -5,7 +5,7 @@ defmodule IntcodeMachine do
     machine = parse(input)
 
     fn inputs ->
-      %{outputs: outputs} = run(%{machine | inputs: inputs})
+      {:halt, %{outputs: outputs}} = run(%{machine | inputs: inputs})
 
       outputs
     end
@@ -27,8 +27,8 @@ defmodule IntcodeMachine do
 
   def run(machine) do
     case step(machine) do
-      {:halt, new_machine} -> new_machine
-      {:await_on_input, new_machine} -> new_machine
+      {:halt, new_machine} -> {:halt, new_machine}
+      {:await_on_input, new_machine} -> {:await_on_input, new_machine}
       {_operation, new_machine} -> run(new_machine)
     end
   end
